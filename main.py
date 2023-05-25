@@ -3,7 +3,6 @@ import cv2
 import cvzone
 import math
 import PokerHandFunction
-import threading
 
 model = YOLO("./playingcards.pt")
 
@@ -31,6 +30,12 @@ while True:
     
     hand1 = []
     hand2 = []
+    result1 = ()
+    result2 = ()
+    hand1result = ""
+    hand2result = ""
+
+
     if(success1):
         results1 = model(img1, stream=True)
         for r in results1:
@@ -54,8 +59,7 @@ while True:
         print(hand1)
         if(len(hand1) == 5):
             result1 = PokerHandFunction.findpokerhand(hand1)
-            cvzone.putTextRect(img1, f'{result1}', (300, 75), scale=3, thickness=5)
-        cv2.imshow("image1", img1)
+            cvzone.putTextRect(img1, f'{result1[1]}', (300, 75), scale=3, thickness=5)
 
     if(success2):
         results2 = model(img2, stream=True)
@@ -80,8 +84,23 @@ while True:
         print(hand2)
         if(len(hand2) == 5):
             result2 = PokerHandFunction.findpokerhand(hand2)
-            cvzone.putTextRect(img2, f'{result2}', (300, 75), scale=3, thickness=5)
+            cvzone.putTextRect(img2, f'{result2[1]}', (300, 75), scale=3, thickness=5)
+
+        if(len(hand1) == 5 and len(hand2) == 5):
+            if(result1[0] > result2[0]):
+                hand1result = "WINNER"
+                hand2result = "LOSER"
+            elif(result1[0] < result2[0]):
+                hand1result = "LOSER"
+                hand2result = "WINNER"
+            else:
+                hand1result = "DRAW"
+                hand2result = "DRAW"
+            cvzone.putTextRect(img1, f'{hand1result}', (300, 125), scale=3, thickness=5)
+            cvzone.putTextRect(img2, f'{hand2result}', (300, 125), scale=3, thickness=5)
+        cv2.imshow("image1", img1)
         cv2.imshow("image2", img2)
+
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
